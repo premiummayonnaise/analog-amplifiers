@@ -1,0 +1,179 @@
+v {xschem version=3.4.7 file_version=1.2}
+G {}
+K {}
+V {}
+S {}
+E {}
+T {5t-ota merupakan topologi OTA yang paling sederhana dan mudah dibuat. 
+Topologi ini sendiri terdiri dari 3 blok analog pokok yakni:
+ 
+active load
+ - terbuat dari pmos current mirror agar mempertahankan rule of thumb pada 
+   differential pair, yakni Id1 = Id2 = 1/2 Itail dalam kondisi common mode
+
+input differential pair
+ - terdiri dari sepasang transistor NMOS yang uniform. komponen ini akan secara langsung menerima input
+   memiliki dua buah port input yakni VINP (untuk input positif) dan VINN (untuk input negatif
+   differential pair hanya akan menguatkan sinyal yang berbentuk differensial dan akan menolak input yang bentuknya
+   seragam (lihat dan review directory mengenai differential pair).
+   
+current mirror untuk Itail dan biasing
+ - blok ini bertanggungjawab atas biasing dan pendefinisian dari nilai Itail. Dengan tujuan untuk membangkitkan nilai
+   Itail yang sesuai dengan menggunakan Ibias yang sekecil mungkin, current mirror ini dapat diatur nilai penguatannya.} 1030 -860 0 0 0.4 0.4 {}
+T {Rule of Thumb untuk sizing 5t-ota:
+
+Seluruh PMOSFET umumnya harus 3 kali lebih besar dari NMOSFET
+Agar praktis, dapat diterapkan fitur multiply (m).
+
+Contoh:
+PMOSFET L = 0.54, W = 5, m = 3
+NMOSFET L = 0.54, W = 5, m = 1
+} 90 -840 0 0 0.4 0.4 {}
+N 330 -380 560 -380 {lab=#net1}
+N 450 -380 450 -320 {lab=#net1}
+N 290 -290 410 -290 {lab=IBIAS}
+N 250 -260 450 -260 {lab=VSS}
+N 250 -380 250 -320 {lab=IBIAS}
+N 250 -340 340 -340 {lab=IBIAS}
+N 340 -340 340 -290 {lab=IBIAS}
+N 330 -500 330 -440 {lab=#net2}
+N 560 -500 560 -440 {lab=OUT}
+N 370 -530 520 -530 {lab=#net2}
+N 330 -470 450 -470 {lab=#net2}
+N 450 -530 450 -470 {lab=#net2}
+N 330 -560 560 -560 {lab=VDD}
+N 330 -410 560 -410 {lab=VSS}
+N 330 -560 330 -530 {lab=VDD}
+N 560 -560 560 -530 {lab=VDD}
+N 450 -290 450 -260 {lab=VSS}
+N 250 -290 250 -260 {lab=VSS}
+N 830 -510 830 -500 {lab=GND}
+N 560 -470 630 -470 {lab=OUT}
+C {devices/code_shown.sym} 1290 -260 0 0 {name=MODELS only_toplevel=true
+format="tcleval( @value )"
+value="
+.include $::180MCU_MODELS/design.ngspice
+.lib $::180MCU_MODELS/sm141064.ngspice typical
+.lib $::180MCU_MODELS/sm141064.ngspice cap_mim
+.lib $::180MCU_MODELS/sm141064.ngspice res_typical
+.lib $::180MCU_MODELS/sm141064.ngspice moscap_typical
+.lib $::180MCU_MODELS/sm141064.ngspice mimcap_typical
+* .lib $::180MCU_MODELS/sm141064.ngspice res_statistical
+"}
+C {devices/code_shown.sym} 1010 -260 0 0 {name=NGSPICE only_toplevel=true
+value="
+.control
+ac DEC 100 1 10G
+let vdiff = VINP - VINN
+let Ao = OUT/(vdiff)
+plot db(Ao)
+.endc
+"}
+C {symbols/nfet_03v3.sym} 580 -410 0 1 {name=M1
+L=2u
+W=10u
+nf=1
+m=1
+ad="'int((nf+1)/2) * W/nf * 0.18u'"
+pd="'2*int((nf+1)/2) * (W/nf + 0.18u)'"
+as="'int((nf+2)/2) * W/nf * 0.18u'"
+ps="'2*int((nf+2)/2) * (W/nf + 0.18u)'"
+nrd="'0.18u / W'" nrs="'0.18u / W'"
+sa=0 sb=0 sd=0
+model=nfet_03v3
+spiceprefix=X
+}
+C {symbols/pfet_03v3.sym} 540 -530 0 0 {name=M2
+L=2u
+W=5u
+nf=1
+m=3
+ad="'int((nf+1)/2) * W/nf * 0.18u'"
+pd="'2*int((nf+1)/2) * (W/nf + 0.18u)'"
+as="'int((nf+2)/2) * W/nf * 0.18u'"
+ps="'2*int((nf+2)/2) * (W/nf + 0.18u)'"
+nrd="'0.18u / W'" nrs="'0.18u / W'"
+sa=0 sb=0 sd=0
+model=pfet_03v3
+spiceprefix=X
+}
+C {symbols/nfet_03v3.sym} 310 -410 0 0 {name=M3
+L=2u
+W=10u
+nf=1
+m=1
+ad="'int((nf+1)/2) * W/nf * 0.18u'"
+pd="'2*int((nf+1)/2) * (W/nf + 0.18u)'"
+as="'int((nf+2)/2) * W/nf * 0.18u'"
+ps="'2*int((nf+2)/2) * (W/nf + 0.18u)'"
+nrd="'0.18u / W'" nrs="'0.18u / W'"
+sa=0 sb=0 sd=0
+model=nfet_03v3
+spiceprefix=X
+}
+C {symbols/pfet_03v3.sym} 350 -530 0 1 {name=M4
+L=2u
+W=5u
+nf=1
+m=3
+ad="'int((nf+1)/2) * W/nf * 0.18u'"
+pd="'2*int((nf+1)/2) * (W/nf + 0.18u)'"
+as="'int((nf+2)/2) * W/nf * 0.18u'"
+ps="'2*int((nf+2)/2) * (W/nf + 0.18u)'"
+nrd="'0.18u / W'" nrs="'0.18u / W'"
+sa=0 sb=0 sd=0
+model=pfet_03v3
+spiceprefix=X
+}
+C {symbols/nfet_03v3.sym} 430 -290 0 0 {name=M5
+L=2u
+W=5u
+nf=1
+m=1
+ad="'int((nf+1)/2) * W/nf * 0.18u'"
+pd="'2*int((nf+1)/2) * (W/nf + 0.18u)'"
+as="'int((nf+2)/2) * W/nf * 0.18u'"
+ps="'2*int((nf+2)/2) * (W/nf + 0.18u)'"
+nrd="'0.18u / W'" nrs="'0.18u / W'"
+sa=0 sb=0 sd=0
+model=nfet_03v3
+spiceprefix=X
+}
+C {symbols/nfet_03v3.sym} 270 -290 0 1 {name=M6
+L=2u
+W=5u
+nf=1
+m=1
+ad="'int((nf+1)/2) * W/nf * 0.18u'"
+pd="'2*int((nf+1)/2) * (W/nf + 0.18u)'"
+as="'int((nf+2)/2) * W/nf * 0.18u'"
+ps="'2*int((nf+2)/2) * (W/nf + 0.18u)'"
+nrd="'0.18u / W'" nrs="'0.18u / W'"
+sa=0 sb=0 sd=0
+model=nfet_03v3
+spiceprefix=X
+}
+C {lab_pin.sym} 250 -380 0 0 {name=p1 sig_type=std_logic lab=IBIAS}
+C {lab_pin.sym} 290 -410 0 0 {name=p2 sig_type=std_logic lab=VINP}
+C {lab_pin.sym} 600 -410 0 1 {name=p3 sig_type=std_logic lab=VINN}
+C {lab_pin.sym} 450 -560 0 0 {name=p4 sig_type=std_logic lab=VDD}
+C {lab_pin.sym} 360 -260 0 0 {name=p5 sig_type=std_logic lab=VSS}
+C {vsource.sym} 650 -310 0 0 {name=V1 value="DC 3.3 AC 1m" savecurrent=false}
+C {vsource.sym} 750 -310 0 0 {name=V2 value="DC 3.3 AC -1m" savecurrent=false}
+C {lab_pin.sym} 750 -340 0 0 {name=p6 sig_type=std_logic lab=VINN}
+C {lab_pin.sym} 650 -340 0 0 {name=p7 sig_type=std_logic lab=VINP}
+C {lab_pin.sym} 650 -280 0 0 {name=p8 sig_type=std_logic lab=VSS}
+C {lab_pin.sym} 750 -280 0 0 {name=p9 sig_type=std_logic lab=VSS}
+C {vsource.sym} 750 -540 0 0 {name=V3 value=3.3 savecurrent=false}
+C {lab_pin.sym} 750 -570 0 0 {name=p10 sig_type=std_logic lab=VDD}
+C {lab_pin.sym} 750 -510 0 0 {name=p11 sig_type=std_logic lab=VSS}
+C {lab_pin.sym} 830 -570 0 0 {name=p12 sig_type=std_logic lab=VSS}
+C {vsource.sym} 830 -540 0 0 {name=V4 value=0 savecurrent=false}
+C {gnd.sym} 830 -500 0 0 {name=l1 lab=GND}
+C {isource.sym} 170 -450 0 0 {name=I0 value=10u}
+C {lab_pin.sym} 170 -480 0 0 {name=p13 sig_type=std_logic lab=VDD}
+C {lab_pin.sym} 170 -420 0 0 {name=p14 sig_type=std_logic lab=IBIAS}
+C {lab_pin.sym} 450 -410 0 0 {name=p15 sig_type=std_logic lab=VSS}
+C {lab_pin.sym} 630 -470 0 1 {name=p16 sig_type=std_logic lab=OUT}
+C {bindkeys_cheatsheet.sym} 2640 -80 0 0 {}
+C {title.sym} 210 -50 0 0 {name=l2 author="Dzaki Andriansyah"}
